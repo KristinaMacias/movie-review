@@ -1,7 +1,7 @@
 import React from "react";
 import ReviewList from "./ReviewList";
+import StarsRating from "./StarsRating";
 import ReactStars from "react-stars";
-
 
 export default class ReviewForm extends React.Component {
   //create a state for review form
@@ -10,67 +10,85 @@ export default class ReviewForm extends React.Component {
     this.state = {
       review: "", //user input
       reviews: [], //array of reviews
-      stars: 0 //number of stars
+      stars: 0, //star rating
     };
   }
 
   //handle change for review form
-  handleReviewChange = (event) => {
-    this.setState({ 
-        review: event.target.value
-    });
+  handleChange = (event) => {
+    this.setState({ review: event.target.value });
   };
 
-  
-
+  //handle change for stars
+  handleStarsChange = (newRating) => {
+    this.setState({ stars: newRating });
+  };
 
   //handle submit for review form
   handleSubmit = (event) => {
     event.preventDefault();
+    //create a new review object
+    const newReview = {
+      review: this.state.review,
+      stars: this.state.stars,
+    };
+    //add new review to array of reviews
     this.setState({
+      reviews: [...this.state.reviews, newReview],
       review: "",
-      reviews: [...this.state.reviews, this.state.review],
+      stars: 0,
     });
-    
-    //clear text area after submit - i think there's a better way to do this
-    document.getElementById("exampleFormControlTextarea1").value = "";
-    
   };
 
   render() {
     return (
       <div>
-        <form>
-          <div className="form-group">
-            {/* text area for user input */}
-            <textarea
-              className="form-control"
-              id="exampleFormControlTextarea1"
-              rows="3"
-              onChange={this.handleReviewChange}
-            ></textarea>
-
-            {/* submit button */}
-            <button
-              type="submit"
-              className="btn btn-primary mt-3"
-              onClick={this.handleSubmit}
-            >
-              Submit
-            </button>
-          </div>
-        </form>
-
-        <h1 className="lead-6 mt-5">Reviews</h1>
-    
-    {/* map through reviews array and display each review */}
         {this.state.reviews.length === 0 ? (
-            <h5>Be the first to leave a review!</h5> 
+          <div>
+            <h2 className="mb-5">There are no reviews yet.</h2>
+          </div>
         ) : (
-            this.state.reviews.map((review, index) => (
-                <ReviewList key={index} review={review} />
-            ))
+          // review list component
+          <div>
+            <h2>Reviews:</h2>
+            {/* mapping reviews state to ReviewList Component */}
+            {this.state.reviews.map((review, index) => (
+              <ReviewList
+                review={review.review}
+                stars={review.stars}
+                index={index}
+              />
+            ))}
+          </div>
         )}
+        {/* review form card */}
+        <div className="card mb-4">
+          <div className="card-body bg-secondary">
+            <h2>Leave a Review:</h2>
+            <form onSubmit={this.handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="review">Review:</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="review"
+                  value={this.state.review}
+                  onChange={this.handleChange}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="stars">Stars:</label>
+                <StarsRating
+                  stars={this.state.stars}
+                  onChange={this.handleStarsChange}
+                />
+              </div>
+              <button type="submit" className="btn btn-primary">
+                Submit
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     );
   }
